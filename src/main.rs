@@ -17,8 +17,10 @@ async fn main() -> Result<(), rocket::Error> {
             config::command::Name::StartNode => {
                 println!("Starting node...");
                 let _rocket = rocket::build()
-                    .manage(Mutex::new(models::account::AccountCollection {
-                        accounts: Vec::new(),
+                    .manage(Mutex::new(models::blockchain::Blockchain {
+                        accounts: models::account::AccountCollection {
+                            accounts: Vec::new(),
+                        },
                     }))
                     .mount("/", routes![routes::get::account_increment])
                     .mount("/", routes![routes::get::account_create])

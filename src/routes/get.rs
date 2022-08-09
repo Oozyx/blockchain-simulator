@@ -1,16 +1,25 @@
 use rocket::State;
 use std::sync::Mutex;
+use std::thread;
+use std::time;
 
 use crate::models;
 
 #[get("/account/increment/<id>")]
 pub fn account_increment(
   id: u32,
-  account_collection: &State<Mutex<models::account::AccountCollection>>,
+  blockchain: &State<Mutex<models::blockchain::Blockchain>>,
 ) -> String {
-  let mut lock = account_collection.lock().unwrap();
+  let mut lock = blockchain.lock().unwrap();
+
+  // sleep until next block
+  println!(
+    "Seconds until block confirmation: {}",
+    lock.get_time_until_next_block()
+  );
+  thread::sleep(time::Duration::from_secs(lock.get_time_until_next_block()));
   // find account
-  let result = lock.accounts.iter_mut().find(|x| x.id == id);
+  let result = lock.accounts.accounts.iter_mut().find(|x| x.id == id);
 
   match result {
     Some(account) => {
@@ -31,11 +40,19 @@ pub fn account_increment(
 pub fn account_create(
   id: u32,
   balance: u32,
-  account_collection: &State<Mutex<models::account::AccountCollection>>,
+  blockchain: &State<Mutex<models::blockchain::Blockchain>>,
 ) -> String {
-  let mut lock = account_collection.lock().unwrap();
+  let mut lock = blockchain.lock().unwrap();
+
+  // sleep until next block
+  println!(
+    "Seconds until block confirmation: {}",
+    lock.get_time_until_next_block()
+  );
+  thread::sleep(time::Duration::from_secs(lock.get_time_until_next_block()));
+
   // create account
-  let account_id = lock.create_account(id, balance);
+  let account_id = lock.accounts.create_account(id, balance);
   let mut res = String::from("Account id: ");
   res.push_str(account_id.to_string().as_str());
 
@@ -47,11 +64,18 @@ pub fn account_transfer(
   from: u32,
   to: u32,
   amount: u32,
-  account_collection: &State<Mutex<models::account::AccountCollection>>,
+  blockchain: &State<Mutex<models::blockchain::Blockchain>>,
 ) -> String {
-  let mut lock = account_collection.lock().unwrap();
+  let mut lock = blockchain.lock().unwrap();
 
-  if !lock.transfer(from, to, amount) {
+  // sleep until next block
+  println!(
+    "Seconds until block confirmation: {}",
+    lock.get_time_until_next_block()
+  );
+  thread::sleep(time::Duration::from_secs(lock.get_time_until_next_block()));
+
+  if !lock.accounts.transfer(from, to, amount) {
     return String::from("Transfer failed.");
   } else {
     return String::from("Transfer success.");
@@ -61,11 +85,11 @@ pub fn account_transfer(
 #[get("/account/balance/<id>")]
 pub fn account_balance(
   id: u32,
-  account_collection: &State<Mutex<models::account::AccountCollection>>,
+  blockchain: &State<Mutex<models::blockchain::Blockchain>>,
 ) -> String {
-  let mut lock = account_collection.lock().unwrap();
+  let mut lock = blockchain.lock().unwrap();
 
-  let result = lock.get_account(id);
+  let result = lock.accounts.get_account(id);
   match result {
     Ok(account) => {
       let mut res = String::from("Account id: ");
