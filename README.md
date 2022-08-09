@@ -19,3 +19,8 @@ In terminal 2 run:
 `cargo run transfer <id_from> <id_to> <amount>`
 
 `cargo run balance <id>`
+
+
+Where <id> is a number (i.e. 1, 2, 3, 4...) 
+  and
+Where <amount>, <initial_balance> are also numbers
