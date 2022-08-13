@@ -9,7 +9,7 @@ mod routes;
 extern crate rocket;
 
 #[rocket::main]
-async fn main() -> Result<(), rocket::Error> {
+async fn main() {
     let config = config::parse::parse_program_args(env::args().collect());
     match config {
         Ok(res) => match res.name {
@@ -30,6 +30,4 @@ async fn main() -> Result<(), rocket::Error> {
             println!("{reason}");
         }
     }
-
-    Ok(())
 }
