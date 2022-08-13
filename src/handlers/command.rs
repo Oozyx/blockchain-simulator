@@ -1,4 +1,24 @@
+use std::sync::Mutex;
+
 use crate::config;
+use crate::models;
+use crate::routes;
+
+pub async fn start_node_handler() {
+  println!("Starting node...");
+  let _rocket = rocket::build()
+    .manage(Mutex::new(models::blockchain::Blockchain {
+      accounts: models::account::AccountCollection {
+        accounts: Vec::new(),
+      },
+    }))
+    .mount("/", routes![routes::get::account_increment])
+    .mount("/", routes![routes::get::account_create])
+    .mount("/", routes![routes::get::account_transfer])
+    .mount("/", routes![routes::get::account_balance])
+    .launch()
+    .await;
+}
 
 pub async fn create_account_handler(command: config::command::Command) {
   println!("Running create account command...");

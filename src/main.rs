@@ -1,5 +1,4 @@
 use std::env;
-use std::sync::Mutex;
 
 mod config;
 mod handlers;
@@ -15,19 +14,7 @@ async fn main() -> Result<(), rocket::Error> {
     match config {
         Ok(res) => match res.name {
             config::command::Name::StartNode => {
-                println!("Starting node...");
-                let _rocket = rocket::build()
-                    .manage(Mutex::new(models::blockchain::Blockchain {
-                        accounts: models::account::AccountCollection {
-                            accounts: Vec::new(),
-                        },
-                    }))
-                    .mount("/", routes![routes::get::account_increment])
-                    .mount("/", routes![routes::get::account_create])
-                    .mount("/", routes![routes::get::account_transfer])
-                    .mount("/", routes![routes::get::account_balance])
-                    .launch()
-                    .await?;
+                handlers::command::start_node_handler().await;
             }
             config::command::Name::CreateAccount => {
                 handlers::command::create_account_handler(res).await;
